@@ -124,6 +124,7 @@ bool              m_boost_on_downmix    = true;
 bool              m_gen_log             = false;
 bool              m_has_playlist        = false;
 std::string       m_playlist_file;
+bool              m_loop_playlist        = false;
 
 enum{ERROR=-1,SUCCESS,ONEBYTE};
 
@@ -191,6 +192,7 @@ void print_usage()
   printf("              --layout                  Set output speaker layout (e.g. 5.1)\n");
   printf("              --key-config <file>       Uses key bindings specified in <file> instead of the default\n");
   printf("              --playlist <file>         Use playlist: <file>\n");
+  printf("              --loop                    Loops clips(right now works only with playlist)\n");
 }
 
 void print_keybindings()
@@ -582,6 +584,7 @@ int main(int argc, char *argv[])
   const int live_opt = 0x205;
   const int layout_opt = 0x206;
   const int playlist_opt = 0x210;
+  const int loop_playlist_opt = 0x212;
 
   struct option longopts[] = {
     { "info",         no_argument,        NULL,          'i' },
@@ -626,6 +629,7 @@ int main(int argc, char *argv[])
     { "live",         no_argument,        NULL,          live_opt },
     { "layout",       required_argument,  NULL,          layout_opt },
     { "playlist",     required_argument,  NULL,          playlist_opt },
+    { "loop_playlist",no_argument,        NULL,          loop_playlist_opt },
     { 0, 0, 0, 0 }
   };
 
@@ -823,6 +827,9 @@ int main(int argc, char *argv[])
         m_has_playlist = true;
         m_playlist_file = optarg;
         break;
+      case loop_playlist_opt:
+        m_loop_playlist = true;
+        break;
       default:
         return 0;
         break;
@@ -844,7 +851,7 @@ int main(int argc, char *argv[])
   }
 
   bool m_exit_if_brocken_file=false;
-  bool m_loop_playlist=false;
+  m_loop_playlist=false;
   int m_cur_clip=0;
   int m_count_clips=0;
 
