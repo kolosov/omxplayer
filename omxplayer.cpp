@@ -27,6 +27,7 @@
 #include <sys/ioctl.h>
 #include <getopt.h>
 #include <string.h>
+#include <fstream>
 
 #define AV_NOWARN_DEPRECATED
 
@@ -837,7 +838,7 @@ int main(int argc, char *argv[])
 
   //only one playlist or m_filename can exist in same time
 
-  if(m_filename && m_has_playlist)
+  if((optind < argc) && m_has_playlist)
   {
     printf("Filename and playlist cannot be used in same time\n");
     return 0;
@@ -1351,14 +1352,14 @@ int main(int argc, char *argv[])
         {
           printf("Play next file\n");
           break;//Not implemented
-        {
+        }
         break;
       case KeyConfig::ACTION_PREV_FILE:
         if(m_has_playlist)
         {
           printf("Play previous file\n");
           break;//Not implemented
-        {
+        }
         break;
       default:
         break;
