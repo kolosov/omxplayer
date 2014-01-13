@@ -121,6 +121,8 @@ bool              m_has_subtitle        = false;
 float             m_display_aspect      = 0.0f;
 bool              m_boost_on_downmix    = true;
 bool              m_gen_log             = false;
+bool              m_has_playlist        = false;
+std::string       m_playlist_file;
 
 enum{ERROR=-1,SUCCESS,ONEBYTE};
 
@@ -187,6 +189,7 @@ void print_usage()
   printf("              --live                    Set for live tv or vod type stream\n");
   printf("              --layout                  Set output speaker layout (e.g. 5.1)\n");
   printf("              --key-config <file>       Uses key bindings specified in <file> instead of the default\n");
+  printf("              --playlist <file>         Use playlist: <file>\n");
 }
 
 void print_keybindings()
@@ -214,6 +217,8 @@ void print_keybindings()
   printf("        right arrow        seek +30 seconds\n");
   printf("        down arrow         seek -600 seconds\n");
   printf("        up arrow           seek +600 seconds\n");
+  printf("        N                  play next file\n");
+  printf("        P                  play previous file\n");
 }
 
 void print_version()
@@ -550,6 +555,7 @@ int main(int argc, char *argv[])
   enum PCMLayout m_layout = PCM_LAYOUT_2_0;
   TV_DISPLAY_STATE_T   tv_state;
   double last_seek_pos = 0;
+  std::vector<std::string> m_playlist;
 
   const int font_opt        = 0x100;
   const int italic_font_opt = 0x201;
@@ -574,6 +580,7 @@ int main(int argc, char *argv[])
   const int orientation_opt = 0x204;
   const int live_opt = 0x205;
   const int layout_opt = 0x206;
+  const int playlist_opt = 0x210;
 
   struct option longopts[] = {
     { "info",         no_argument,        NULL,          'i' },
@@ -617,6 +624,7 @@ int main(int argc, char *argv[])
     { "orientation",  required_argument,  NULL,          orientation_opt },
     { "live",         no_argument,        NULL,          live_opt },
     { "layout",       required_argument,  NULL,          layout_opt },
+    { "playlist",     required_argument,  NULL,          playlist_opt },
     { 0, 0, 0, 0 }
   };
 
@@ -810,6 +818,10 @@ int main(int argc, char *argv[])
       case ':':
         return 0;
         break;
+      case playlist_opt:
+        m_has_playlist = true;
+        m_playlist_file = optarg;
+        break;
       default:
         return 0;
         break;
@@ -823,10 +835,36 @@ int main(int argc, char *argv[])
 
   m_filename = argv[optind];
 
+  //only one playlist or m_filename can exist in same time
+
+  if(m_filename && m_has_playlist)
+  {
+    printf("Filename and playlist cannot be used in same time\n");
+    return 0;
+  }
+
   auto PrintFileNotFound = [](const std::string& path)
   {
     printf("File \"%s\" not found.\n", path.c_str());
   };
+
+  //load playlist
+  if(m_has_playlist)
+  {
+    std::ifstream myfile(m_playlist_file);
+    std::string str;
+    if (!myfile)
+    {
+      printf("Cannot open playlist file: \"%s\"\n", m_playlist_file.c_str());
+      return 0;
+    }
+    while(getline(myfile,str))
+    {
+      m_playlist.push_back(str);
+    }
+    myfile.close();
+  }
+
 
   bool filename_is_URL = IsURL(m_filename);
 
@@ -1307,6 +1345,20 @@ int main(int argc, char *argv[])
         DISPLAY_TEXT_SHORT(strprintf("Volume: %.2f dB",
           m_Volume / 100.0f));
         printf("Current Volume: %.2fdB\n", m_Volume / 100.0f);
+        break;
+      case KeyConfig::ACTION_NEXT_FILE:
+        if(m_has_playlist)
+        {
+          printf("Play next file\n");
+          break;//Not implemented
+        {
+        break;
+      case KeyConfig::ACTION_PREV_FILE:
+        if(m_has_playlist)
+        {
+          printf("Play previous file\n");
+          break;//Not implemented
+        {
         break;
       default:
         break;

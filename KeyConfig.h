@@ -30,6 +30,8 @@ class KeyConfig
         ACTION_SEEK_BACK_LARGE,
         ACTION_SEEK_FORWARD_LARGE,
         ACTION_STEP,
+        ACTION_NEXT_FILE,
+        ACTION_PREV_FILE,
         ACTION_BLANK
     };
 
