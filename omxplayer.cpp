@@ -902,28 +902,32 @@ int main(int argc, char *argv[])
     m_filename=m_playlist.at(m_cur_clip);
   }
 
-  while(true)
+  do
   {
-    printf("Try check filename, m_cur_clip=%d, filename=%s\n",m_cur_clip, m_filename.c_str());
+    printf("Try check filename, m_cur_clip=%d, m_filename=%s\n",m_cur_clip, m_filename.c_str());
     bool filename_is_URL = IsURL(m_filename);
     if(m_has_playlist && !m_exit_if_brocken_file)
     {
+	  printf("Try GetNextClip\n");
       GetNextClip(m_loop_playlist, m_count_clips);
       if (m_cur_clip<0) break;
       else
       {
+	    printf("Try get new m_filename\n");
         m_filename=m_playlist.at(m_cur_clip);
-        continue;
+        //continue; //for test
       }
     }
     else
     {
+	  printf("No playlist, ordinar mode\n");
       if(!filename_is_URL && !IsPipe(m_filename) && !Exists(m_filename))
       {
         PrintFileNotFound(m_filename);
         return 0;
       }
     }
+    printf("Try check fonts\n");
     if(m_asked_for_font && !Exists(m_font_path))
     {
       PrintFileNotFound(m_font_path);
@@ -972,8 +976,11 @@ int main(int argc, char *argv[])
       CLog::SetLogLevel(LOG_LEVEL_NONE);
     }
 
+    printf("Try to initialize RBP and OMX\n");
     g_RBP.Initialize();
     g_OMX.Initialize();
+    
+	printf("Set blank background\n");
 
     blank_background(m_blank_background);
 
@@ -982,12 +989,14 @@ int main(int argc, char *argv[])
     if (gpu_mem > 0 && gpu_mem < min_gpu_mem)
       printf("Only %dM of gpu_mem is configured. Try running \"sudo raspi-config\" and ensure that \"memory_split\" has a value of %d or greater\n", gpu_mem, min_gpu_mem);
 
+	printf("Set OMXClock\n");
     m_av_clock = new OMXClock();
     m_omxcontrol.init(m_av_clock, &m_player_audio);
     m_keyboard.setKeymap(keymap);
 
     m_thread_player = true;
 
+    printf("Try omx_reader with file %s\n",m_filename.c_str());
     if(!m_omx_reader.Open(m_filename.c_str(), m_dump_format, m_live))
       goto do_exit;
 
@@ -1698,6 +1707,7 @@ int main(int argc, char *argv[])
     }
 
 do_exit:
+    printf("DO_EXIT\n");
     if (m_stats)
       printf("\n");
 
@@ -1736,7 +1746,7 @@ do_exit:
 
     g_OMX.Deinitialize();
     g_RBP.Deinitialize();
-  }//end while
+  } while (m_has_playlist); //end while
 
   printf("have a nice day ;)\n");
   return 1;
